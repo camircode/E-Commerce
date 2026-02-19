@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TiendaOnline - Tu tienda de comercio electrónico con los mejores productos">
+    <title>{% block titulo %}TiendaOnline{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    {% block estilos_extra %}{% endblock %}
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-navbar sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('principal.inicio') }}">
+                <i class="bi bi-shop"></i> TiendaOnline
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPrincipal">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarPrincipal">
+                <!-- Buscador -->
+                <form class="d-flex mx-auto buscador-nav" action="{{ url_for('productos.catalogo') }}" method="GET">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="busqueda" placeholder="Buscar productos..." 
+                               value="{{ request.args.get('busqueda', '') }}" id="buscadorNav">
+                        <button class="btn btn-buscar" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+                <!-- Menú derecho -->
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('productos.catalogo') }}">
+                            <i class="bi bi-grid"></i> Catálogo
+                        </a>
+                    </li>
+                    {% if session.get('usuario_id') %}
+                        {% if session.get('usuario_rol') == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin.panel') }}">
+                                <i class="bi bi-speedometer2"></i> Admin
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('pedidos.mis_pedidos') }}">
+                                <i class="bi bi-bag-check"></i> Mis Pedidos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link posicion-relativa" href="{{ url_for('carrito.ver_carrito') }}">
+                                <i class="bi bi-cart3"></i> Carrito
+                                <span class="badge bg-danger badge-carrito" id="badgeCarrito">{{ total_carrito }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle"></i> {{ session.get('usuario_nombre', 'Usuario') }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark">
+                                <li><a class="dropdown-item" href="{{ url_for('pedidos.mis_pedidos') }}">
+                                    <i class="bi bi-receipt"></i> Mis Pedidos</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link posicion-relativa" href="{{ url_for('carrito.ver_carrito') }}">
+                                <i class="bi bi-cart3"></i> Carrito
+                                <span class="badge bg-danger badge-carrito" id="badgeCarrito">{{ total_carrito }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">
+                                <i class="bi bi-box-arrow-in-right"></i> Ingresar
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-registro btn-sm ms-2" href="{{ url_for('auth.registro') }}">
+                                Registrarse
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mensajes Flash -->
+    <div class="container mt-3">
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+            {% if mensajes %}
+                {% for categoria, mensaje in mensajes %}
+                    <div class="alert alert-{{ 'success' if categoria == 'exito' else 'danger' if categoria == 'error' else 'warning' if categoria == 'advertencia' else 'info' }} alert-dismissible fade show" role="alert">
+                        <i class="bi bi-{{ 'check-circle' if categoria == 'exito' else 'exclamation-triangle' if categoria == 'error' else 'info-circle' }}"></i>
+                        {{ mensaje }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Contenido principal -->
+    <main>
+        {% block contenido %}{% endblock %}
+    </main>
+
+    <!-- Pie de página -->
+    <footer class="footer-principal mt-5">
+        <div class="container">
+            <div class="row py-5">
+                <div class="col-md-4 mb-4">
+                    <h5><i class="bi bi-shop"></i> TiendaOnline</h5>
+                    <p class="text-muted">Tu destino para las mejores compras en línea. Calidad, variedad y los mejores precios.</p>
+                    <div class="redes-sociales">
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-twitter-x"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6>Navegación</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('principal.inicio') }}">Inicio</a></li>
+                        <li><a href="{{ url_for('productos.catalogo') }}">Catálogo</a></li>
+                        <li><a href="{{ url_for('carrito.ver_carrito') }}">Carrito</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6>Categorías</h6>
+                    <ul class="list-unstyled">
+                        {% for cat in categorias_nav %}
+                        <li><a href="{{ url_for('productos.catalogo', categoria=cat.id) }}">{{ cat.nombre }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6>Contacto</h6>
+                    <ul class="list-unstyled text-muted">
+                        <li><i class="bi bi-envelope"></i> contacto@tiendaonline.com</li>
+                        <li><i class="bi bi-telephone"></i> +52 (555) 123-4567</li>
+                        <li><i class="bi bi-geo-alt"></i> Ciudad de México, México</li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center py-3 text-muted">
+                <small>&copy; 2025 TiendaOnline. Todos los derechos reservados.</small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JavaScript principal -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts_extra %}{% endblock %}
+</body>
+</html>

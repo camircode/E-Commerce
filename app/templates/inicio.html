@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block titulo %}TiendaOnline - Inicio{% endblock %}
+
+{% block contenido %}
+<!-- Hero / Banner principal -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6" style="position: relative; z-index: 1;">
+                <h1 class="hero-titulo">
+                    Descubre lo mejor en <span class="texto-gradiente">compras en línea</span>
+                </h1>
+                <p class="hero-subtitulo">
+                    Explora nuestra amplia selección de productos con los mejores precios. Envío rápido y compras
+                    seguras.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ url_for('productos.catalogo') }}" class="btn-primario">
+                        <i class="bi bi-grid"></i> Ver Catálogo
+                    </a>
+                    <a href="#categorias" class="btn-secundario">
+                        <i class="bi bi-tags"></i> Categorías
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center mt-4 mt-lg-0" style="position: relative; z-index: 1;">
+                <div style="font-size: 12rem; opacity: 0.15;">
+                    <i class="bi bi-bag-heart"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categorías -->
+<section class="seccion-categorias" id="categorias">
+    <div class="container">
+        <h2 class="titulo-seccion text-center">Nuestras <span class="texto-gradiente">Categorías</span></h2>
+        <p class="subtitulo-seccion text-center">Encuentra lo que necesitas navegando por nuestras categorías</p>
+        <div class="row g-4">
+            {% set iconos = ['bi-cpu', 'bi-bag', 'bi-house', 'bi-trophy', 'bi-book'] %}
+            {% for cat in categorias %}
+            <div class="col-6 col-md-4 col-lg">
+                <a href="{{ url_for('productos.catalogo', categoria=cat.id) }}" style="text-decoration: none;">
+                    <div class="tarjeta-categoria">
+                        <div class="icono-categoria">
+                            <i class="bi {{ iconos[loop.index0 % iconos|length] }}"></i>
+                        </div>
+                        <h5>{{ cat.nombre }}</h5>
+                        <span class="cantidad">{{ cat.total_productos }} productos</span>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Productos Destacados -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="titulo-seccion text-center">Productos <span class="texto-gradiente">Destacados</span></h2>
+        <p class="subtitulo-seccion text-center">Los productos más recientes de nuestro catálogo</p>
+        <div class="row g-4">
+            {% for producto in productos %}
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="tarjeta-producto">
+                    <div class="imagen-producto">
+                        {% if producto.imagen and producto.imagen != 'sin_imagen.png' %}
+                        <img src="{{ url_for('static', filename='uploads/' + producto.imagen) }}"
+                            alt="{{ producto.nombre }}"
+                            onerror="this.parentElement.innerHTML='<div class=\'imagen-placeholder\'><i class=\'bi bi-image\'></i></div>'">
+                        {% else %}
+                        <div class="imagen-placeholder"><i class="bi bi-image"></i></div>
+                        {% endif %}
+                    </div>
+                    <div class="cuerpo-tarjeta">
+                        {% if producto.categoria_nombre %}
+                        <span class="categoria-badge">{{ producto.categoria_nombre }}</span>
+                        {% endif %}
+                        <h5 class="nombre-producto">{{ producto.nombre }}</h5>
+                        <div class="precio-producto">${{ "%.2f"|format(producto.precio) }}</div>
+                        <div class="acciones-tarjeta">
+                            {% if producto.stock > 0 %}
+                            <button class="btn-agregar-carrito" onclick="agregarAlCarrito({{ producto.id }})">
+                                <i class="bi bi-cart-plus"></i> Agregar
+                            </button>
+                            {% else %}
+                            <span class="stock-agotado">Agotado</span>
+                            {% endif %}
+                            <a href="{{ url_for('productos.detalle_producto', producto_id=producto.id) }}"
+                                class="btn-ver-detalle">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('productos.catalogo') }}" class="btn-primario">
+                Ver todos los productos <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Características -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="tarjeta-categoria text-center">
+                    <div class="icono-categoria"><i class="bi bi-truck"></i></div>
+                    <h5>Envío Rápido</h5>
+                    <span class="cantidad">Entrega en 24-48 horas</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="tarjeta-categoria text-center">
+                    <div class="icono-categoria"><i class="bi bi-shield-check"></i></div>
+                    <h5>Compra Segura</h5>
+                    <span class="cantidad">Pagos protegidos 100%</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="tarjeta-categoria text-center">
+                    <div class="icono-categoria"><i class="bi bi-headset"></i></div>
+                    <h5>Soporte 24/7</h5>
+                    <span class="cantidad">Siempre a tu servicio</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

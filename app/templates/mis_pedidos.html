@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titulo %}Mis Pedidos - TiendaOnline{% endblock %}
+
+{% block contenido %}
+<div class="container py-4">
+    <h2 class="titulo-seccion"><i class="bi bi-bag-check"></i> Mis <span class="texto-gradiente">Pedidos</span></h2>
+    <p class="subtitulo-seccion">Historial de todas tus compras</p>
+
+    {% if pedidos %}
+    {% for pedido in pedidos %}
+    <div class="tarjeta-pedido">
+        <div class="info-pedido">
+            <div>
+                <strong style="color: var(--color-primario); font-size: 1.1rem;">{{ pedido.numero_orden }}</strong>
+                <br><small style="color: var(--color-texto-claro);">
+                    {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') if pedido.fecha else 'N/A' }}
+                    · {{ pedido.total_items }} artículo{{ 's' if pedido.total_items != 1 }}
+                </small>
+            </div>
+            <div class="text-end">
+                <div style="font-size: 1.3rem; font-weight: 700; color: var(--color-secundario);">
+                    ${{ "%.2f"|format(pedido.total) }}
+                </div>
+                <span class="badge-estado badge-{{ pedido.estado }}">
+                    {{ pedido.estado|capitalize }}
+                </span>
+            </div>
+            <a href="{{ url_for('pedidos.detalle_pedido', pedido_id=pedido.id) }}" class="btn-secundario"
+                style="padding: 0.4rem 1rem; font-size: 0.85rem;">
+                <i class="bi bi-eye"></i> Ver Detalle
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="carrito-vacio">
+        <i class="bi bi-bag-x"></i>
+        <h3>No tienes pedidos aún</h3>
+        <p>¡Realiza tu primera compra y aparecerá aquí!</p>
+        <a href="{{ url_for('productos.catalogo') }}" class="btn-primario">
+            <i class="bi bi-grid"></i> Explorar Catálogo
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

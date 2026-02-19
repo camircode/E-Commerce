@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block titulo %}Pago - TiendaOnline{% endblock %}
+
+{% block contenido %}
+<div class="container py-4">
+    <h2 class="titulo-seccion text-center"><i class="bi bi-credit-card"></i> Simulación de <span
+            class="texto-gradiente">Pago</span></h2>
+    <p class="subtitulo-seccion text-center">Completa los datos de tu tarjeta para finalizar la compra</p>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <!-- Tarjeta visual -->
+            <div class="tarjeta-pago">
+                <div style="font-size: 0.9rem; opacity: 0.8;">TiendaOnline</div>
+                <div class="numero-tarjeta" id="vistaNumero">•••• •••• •••• ••••</div>
+                <div class="datos-tarjeta">
+                    <div>
+                        <div style="font-size: 0.7rem; opacity: 0.7;">Titular</div>
+                        <div id="vistaTitular">NOMBRE DEL TITULAR</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.7rem; opacity: 0.7;">Vence</div>
+                        <div id="vistaVence">MM/AA</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de pago -->
+            <div
+                style="background: var(--color-fondo-card); border: 1px solid rgba(108,92,231,0.1); border-radius: var(--borde-radius); padding: 2rem;">
+                <div class="d-flex justify-content-between align-items-center mb-3"
+                    style="padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <span style="color: var(--color-texto-claro);">Orden:</span>
+                    <strong style="color: var(--color-primario);">{{ pedido.numero_orden }}</strong>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <span style="color: var(--color-texto-claro);">Total a pagar:</span>
+                    <strong style="font-size: 1.5rem; color: var(--color-secundario);">${{ "%.2f"|format(pedido.total)
+                        }} MXN</strong>
+                </div>
+
+                <form action="{{ url_for('pedidos.procesar_pago') }}" method="POST" id="formPago" novalidate>
+                    <input type="hidden" name="pedido_id" value="{{ pedido.id }}">
+
+                    <div class="form-flotante" id="grupoTitular">
+                        <label for="nombre_titular">Nombre del titular</label>
+                        <input type="text" id="nombre_titular" name="nombre_titular" required
+                            placeholder="Como aparece en la tarjeta"
+                            oninput="document.getElementById('vistaTitular').textContent = this.value.toUpperCase() || 'NOMBRE DEL TITULAR'">
+                        <div class="error-campo">El nombre del titular es obligatorio</div>
+                    </div>
+
+                    <div class="form-flotante" id="grupoNumero">
+                        <label for="numero_tarjeta">Número de tarjeta</label>
+                        <input type="text" id="numero_tarjeta" name="numero_tarjeta" required
+                            placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatearTarjeta(this)">
+                        <div class="error-campo">Ingresa un número de tarjeta válido (16 dígitos)</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-flotante" id="grupoVence">
+                                <label for="vencimiento">Vencimiento</label>
+                                <input type="text" id="vencimiento" name="vencimiento" required placeholder="MM/AA"
+                                    maxlength="5" oninput="formatearVencimiento(this)">
+                                <div class="error-campo">Formato: MM/AA</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-flotante" id="grupoCvv">
+                                <label for="cvv">CVV</label>
+                                <input type="text" id="cvv" name="cvv" required placeholder="123" maxlength="4">
+                                <div class="error-campo">CVV inválido</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-exito w-100 mt-3"
+                        style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 1.1rem; padding: 0.9rem;">
+                        <i class="bi bi-lock-fill"></i> Pagar ${{ "%.2f"|format(pedido.total) }} MXN
+                    </button>
+                </form>
+
+                <div class="text-center mt-3">
+                    <small style="color: var(--color-texto-claro);">
+                        <i class="bi bi-shield-lock"></i> Simulación de pago seguro · No se realizan cargos reales
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+    function formatearTarjeta(input) {
+        let valor = input.value.replace(/\D/g, '');
+        let formateado = valor.match(/.{1,4}/g);
+        input.value = formateado ? formateado.join(' ') : '';
+        document.getElementById('vistaNumero').textContent = input.value || '•••• •••• •••• ••••';
+    }
+
+    function formatearVencimiento(input) {
+        let valor = input.value.replace(/\D/g, '');
+        if (valor.length >= 2) {
+            input.value = valor.substring(0, 2) + '/' + valor.substring(2, 4);
+        }
+        document.getElementById('vistaVence').textContent = input.value || 'MM/AA';
+    }
+
+    document.getElementById('formPago').addEventListener('submit', function (e) {
+        let valido = true;
+        const titular = document.getElementById('nombre_titular');
+        const grupoTitular = document.getElementById('grupoTitular');
+        if (titular.value.trim().length < 3) { grupoTitular.classList.add('invalido'); valido = false; }
+        else { grupoTitular.classList.remove('invalido'); }
+
+        const numero = document.getElementById('numero_tarjeta');
+        const grupoNumero = document.getElementById('grupoNumero');
+        if (numero.value.replace(/\s/g, '').length < 16) { grupoNumero.classList.add('invalido'); valido = false; }
+        else { grupoNumero.classList.remove('invalido'); }
+
+        const vence = document.getElementById('vencimiento');
+        const grupoVence = document.getElementById('grupoVence');
+        if (!/^\d{2}\/\d{2}$/.test(vence.value)) { grupoVence.classList.add('invalido'); valido = false; }
+        else { grupoVence.classList.remove('invalido'); }
+
+        const cvv = document.getElementById('cvv');
+        const grupoCvv = document.getElementById('grupoCvv');
+        if (cvv.value.length < 3) { grupoCvv.classList.add('invalido'); valido = false; }
+        else { grupoCvv.classList.remove('invalido'); }
+
+        if (!valido) e.preventDefault();
+    });
+</script>
+{% endblock %}

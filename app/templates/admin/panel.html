@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block titulo %}Panel de Administración - TiendaOnline{% endblock %}
+
+{% block contenido %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="titulo-seccion mb-0"><i class="bi bi-speedometer2"></i> Panel de <span
+                    class="texto-gradiente">Administración</span></h2>
+            <p class="subtitulo-seccion mb-0">Resumen general de la tienda</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('admin.listar_productos') }}" class="btn-primario"
+                style="font-size: 0.85rem; padding: 0.5rem 1rem;">
+                <i class="bi bi-box-seam"></i> Productos
+            </a>
+            <a href="{{ url_for('admin.listar_pedidos') }}" class="btn-secundario"
+                style="font-size: 0.85rem; padding: 0.5rem 1rem;">
+                <i class="bi bi-receipt"></i> Pedidos
+            </a>
+        </div>
+    </div>
+
+    <!-- Tarjetas de estadísticas -->
+    <div class="row g-4 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="tarjeta-estadistica">
+                <div class="icono-stat" style="background: rgba(0, 184, 148, 0.15); color: var(--color-exito);">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+                <div class="valor-stat">${{ "%.2f"|format(ventas_totales.total_ventas) if ventas_totales else '0.00' }}
+                </div>
+                <div class="titulo-stat">Ventas Totales</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="tarjeta-estadistica">
+                <div class="icono-stat" style="background: rgba(108, 92, 231, 0.15); color: var(--color-primario);">
+                    <i class="bi bi-bag"></i>
+                </div>
+                <div class="valor-stat">{{ ventas_totales.total_pedidos if ventas_totales else 0 }}</div>
+                <div class="titulo-stat">Pedidos Pagados</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="tarjeta-estadistica">
+                <div class="icono-stat" style="background: rgba(0, 206, 201, 0.15); color: var(--color-secundario);">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="valor-stat">{{ total_usuarios.total if total_usuarios else 0 }}</div>
+                <div class="titulo-stat">Clientes</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="tarjeta-estadistica">
+                <div class="icono-stat" style="background: rgba(253, 121, 168, 0.15); color: var(--color-acento);">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="valor-stat">{{ total_productos.total if total_productos else 0 }}</div>
+                <div class="titulo-stat">Productos Activos</div>
+            </div>
+        </div>
+    </div>
+
+    {% if productos_bajo_stock and productos_bajo_stock.total > 0 %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> <strong>{{ productos_bajo_stock.total }}</strong> producto(s) con
+        stock bajo (≤ 5 unidades)
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Productos más vendidos -->
+        <div class="col-lg-6">
+            <div
+                style="background: var(--color-fondo-card); border: 1px solid rgba(108,92,231,0.1); border-radius: var(--borde-radius); padding: 1.5rem;">
+                <h5 style="color: #fff; margin-bottom: 1rem;"><i class="bi bi-trophy"></i> Productos Más Vendidos</h5>
+                {% if productos_top %}
+                {% for prod in productos_top %}
+                <div class="d-flex justify-content-between align-items-center py-2"
+                    style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div>
+                        <span style="color: var(--color-primario); font-weight: 700; margin-right: 0.5rem;">#{{
+                            loop.index }}</span>
+                        <span style="color: #fff;">{{ prod.nombre }}</span>
+                    </div>
+                    <div class="text-end">
+                        <div style="color: var(--color-secundario); font-weight: 600;">${{
+                            "%.2f"|format(prod.total_ingresos) }}</div>
+                        <small style="color: var(--color-texto-claro);">{{ prod.total_vendido }} vendidos</small>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p style="color: var(--color-texto-claro); text-align: center; padding: 2rem 0;">Aún no hay ventas
+                    registradas</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Pedidos recientes -->
+        <div class="col-lg-6">
+            <div
+                style="background: var(--color-fondo-card); border: 1px solid rgba(108,92,231,0.1); border-radius: var(--borde-radius); padding: 1.5rem;">
+                <h5 style="color: #fff; margin-bottom: 1rem;"><i class="bi bi-clock-history"></i> Pedidos Recientes</h5>
+                {% if pedidos_recientes %}
+                {% for pedido in pedidos_recientes[:5] %}
+                <div class="d-flex justify-content-between align-items-center py-2"
+                    style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div>
+                        <strong style="color: var(--color-primario); font-size: 0.85rem;">{{ pedido.numero_orden
+                            }}</strong>
+                        <br><small style="color: var(--color-texto-claro);">{{ pedido.usuario_nombre }}</small>
+                    </div>
+                    <div class="text-end">
+                        <div style="color: #fff; font-weight: 600;">${{ "%.2f"|format(pedido.total) }}</div>
+                        <span class="badge-estado badge-{{ pedido.estado }}" style="font-size: 0.7rem;">{{
+                            pedido.estado|capitalize }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p style="color: var(--color-texto-claro); text-align: center; padding: 2rem 0;">No hay pedidos aún</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Ventas mensuales -->
+    {% if ventas_mensuales %}
+    <div class="mt-4"
+        style="background: var(--color-fondo-card); border: 1px solid rgba(108,92,231,0.1); border-radius: var(--borde-radius); padding: 1.5rem;">
+        <h5 style="color: #fff; margin-bottom: 1rem;"><i class="bi bi-graph-up"></i> Ventas por Mes</h5>
+        <div class="table-responsive">
+            <table class="tabla-admin">
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th>Pedidos</th>
+                        <th>Ventas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venta in ventas_mensuales %}
+                    <tr>
+                        <td style="color: #fff;">{{ venta.mes }}</td>
+                        <td>{{ venta.total_pedidos }}</td>
+                        <td style="color: var(--color-exito); font-weight: 600;">${{ "%.2f"|format(venta.total_ventas)
+                            }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

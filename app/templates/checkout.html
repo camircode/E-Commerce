@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block titulo %}Checkout - TiendaOnline{% endblock %}
+
+{% block contenido %}
+<div class="container py-4">
+    <h2 class="titulo-seccion"><i class="bi bi-bag-check"></i> Finalizar <span class="texto-gradiente">Compra</span>
+    </h2>
+    <p class="subtitulo-seccion">Revisa tu pedido y completa la información de envío</p>
+
+    <div class="row g-4">
+        <!-- Formulario de envío -->
+        <div class="col-lg-7">
+            <div
+                style="background: var(--color-fondo-card); border: 1px solid rgba(108,92,231,0.1); border-radius: var(--borde-radius); padding: 2rem;">
+                <h4 style="color: #fff; margin-bottom: 1.5rem;"><i class="bi bi-geo-alt"></i> Información de Envío</h4>
+                <form action="{{ url_for('pedidos.checkout') }}" method="POST" id="formCheckout" novalidate>
+                    <div class="form-flotante" id="grupoDireccion">
+                        <label for="direccion">Dirección de envío</label>
+                        <textarea id="direccion" name="direccion" rows="3" required
+                            placeholder="Calle, número, colonia, ciudad, estado, CP"></textarea>
+                        <div class="error-campo">La dirección de envío es obligatoria</div>
+                    </div>
+
+                    <div class="form-flotante" id="grupoTelefono">
+                        <label for="telefono">Teléfono de contacto</label>
+                        <input type="tel" id="telefono" name="telefono" required placeholder="Ej: 555-123-4567"
+                            pattern="[0-9\-\+\s]{7,20}">
+                        <div class="error-campo">Ingresa un número de teléfono válido</div>
+                    </div>
+
+                    <button type="submit" class="btn-exito w-100 mt-3"
+                        style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <i class="bi bi-lock"></i> Continuar al Pago
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Resumen del pedido -->
+        <div class="col-lg-5">
+            <div class="resumen-carrito">
+                <h4><i class="bi bi-receipt"></i> Resumen del Pedido</h4>
+                {% for item in items %}
+                <div class="d-flex justify-content-between align-items-center mb-2"
+                    style="padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div>
+                        <span style="color: #fff; font-weight: 500;">{{ item.nombre }}</span>
+                        <br><small style="color: var(--color-texto-claro);">Cantidad: {{ item.cantidad }}</small>
+                    </div>
+                    <span style="color: var(--color-secundario); font-weight: 600;">${{ "%.2f"|format(item.subtotal)
+                        }}</span>
+                </div>
+                {% endfor %}
+                <div class="resumen-linea mt-3">
+                    <span>Subtotal</span>
+                    <span>${{ "%.2f"|format(total) }}</span>
+                </div>
+                <div class="resumen-linea">
+                    <span>Envío</span>
+                    <span style="color: var(--color-exito);">Gratis</span>
+                </div>
+                <div class="resumen-total">
+                    <span>Total a Pagar</span>
+                    <span>${{ "%.2f"|format(total) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+    document.getElementById('formCheckout').addEventListener('submit', function (e) {
+        let valido = true;
+        const direccion = document.getElementById('direccion');
+        const grupoDireccion = document.getElementById('grupoDireccion');
+        if (direccion.value.trim().length < 10) {
+            grupoDireccion.classList.add('invalido');
+            valido = false;
+        } else {
+            grupoDireccion.classList.remove('invalido');
+        }
+
+        const telefono = document.getElementById('telefono');
+        const grupoTelefono = document.getElementById('grupoTelefono');
+        if (telefono.value.trim().length < 7) {
+            grupoTelefono.classList.add('invalido');
+            valido = false;
+        } else {
+            grupoTelefono.classList.remove('invalido');
+        }
+        if (!valido) e.preventDefault();
+    });
+</script>
+{% endblock %}

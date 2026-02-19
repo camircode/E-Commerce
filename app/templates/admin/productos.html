@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block titulo %}Gestión de Productos - TiendaOnline{% endblock %}
+
+{% block contenido %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="titulo-seccion mb-0"><i class="bi bi-box-seam"></i> Gestión de <span
+                    class="texto-gradiente">Productos</span></h2>
+            <p class="subtitulo-seccion mb-0">Administra el inventario de la tienda</p>
+        </div>
+        <a href="{{ url_for('admin.crear_producto') }}" class="btn-primario" style="font-size: 0.9rem;">
+            <i class="bi bi-plus-lg"></i> Nuevo Producto
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="tabla-admin">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td style="color: var(--color-texto-claro);">#{{ producto.id }}</td>
+                    <td>
+                        {% if producto.imagen and producto.imagen != 'sin_imagen.png' %}
+                        <img src="{{ url_for('static', filename='uploads/' + producto.imagen) }}" alt=""
+                            style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover;"
+                            onerror="this.style.display='none'">
+                        {% else %}
+                        <div
+                            style="width: 45px; height: 45px; border-radius: 8px; background: rgba(108,92,231,0.1); display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-image" style="color: var(--color-texto-claro);"></i>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td><strong style="color: #fff;">{{ producto.nombre }}</strong></td>
+                    <td style="color: var(--color-texto-claro);">{{ producto.categoria_nombre or 'Sin categoría' }}</td>
+                    <td style="color: var(--color-secundario); font-weight: 600;">${{ "%.2f"|format(producto.precio) }}
+                    </td>
+                    <td>
+                        {% if producto.stock <= 5 %} <span style="color: var(--color-peligro); font-weight: 600;">{{
+                            producto.stock }}</span>
+                            {% else %}
+                            <span style="color: var(--color-exito);">{{ producto.stock }}</span>
+                            {% endif %}
+                    </td>
+                    <td>
+                        {% if producto.activo %}
+                        <span class="badge-estado badge-pagado">Activo</span>
+                        {% else %}
+                        <span class="badge-estado badge-cancelado">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="{{ url_for('admin.editar_producto', producto_id=producto.id) }}" class="btn btn-sm"
+                                style="color: var(--color-primario);" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form action="{{ url_for('admin.eliminar_producto', producto_id=producto.id) }}"
+                                method="POST"
+                                onsubmit="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
+                                <button type="submit" class="btn btn-sm" style="color: var(--color-peligro);"
+                                    title="Eliminar">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if not productos %}
+    <div class="text-center py-5">
+        <i class="bi bi-inbox" style="font-size: 3rem; color: var(--color-texto-claro);"></i>
+        <p style="color: var(--color-texto-claro); margin-top: 1rem;">No hay productos registrados</p>
+    </div>
+    {% endif %}
+
+    <div class="mt-3">
+        <a href="{{ url_for('admin.panel') }}" style="color: var(--color-texto-claro);"><i class="bi bi-arrow-left"></i>
+            Volver al Panel</a>
+    </div>
+</div>
+{% endblock %}

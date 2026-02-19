@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block titulo %}{{ producto.nombre }} - TiendaOnline{% endblock %}
+
+{% block contenido %}
+<div class="container detalle-producto-seccion">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb" style="background: transparent; padding: 0;">
+            <li class="breadcrumb-item"><a href="{{ url_for('principal.inicio') }}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('productos.catalogo') }}">Catálogo</a></li>
+            {% if producto.categoria_nombre %}
+            <li class="breadcrumb-item"><a
+                    href="{{ url_for('productos.catalogo', categoria=producto.categoria_id) }}">{{
+                    producto.categoria_nombre }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active" style="color: var(--color-texto-claro);">{{ producto.nombre }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Imagen del producto -->
+        <div class="col-lg-6">
+            <div class="galeria-producto">
+                {% if producto.imagen and producto.imagen != 'sin_imagen.png' %}
+                <img src="{{ url_for('static', filename='uploads/' + producto.imagen) }}" alt="{{ producto.nombre }}"
+                    onerror="this.src=''; this.style.display='none'; this.parentElement.innerHTML='<div class=\'imagen-placeholder\' style=\'height:450px;font-size:5rem;\'><i class=\'bi bi-image\'></i></div>'">
+                {% else %}
+                <div class="imagen-placeholder" style="height: 450px; font-size: 5rem;">
+                    <i class="bi bi-image"></i>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Información del producto -->
+        <div class="col-lg-6">
+            <div class="info-producto">
+                {% if producto.categoria_nombre %}
+                <span class="categoria-badge" style="font-size: 0.85rem; padding: 0.3rem 1rem;">{{
+                    producto.categoria_nombre }}</span>
+                {% endif %}
+
+                <h1>{{ producto.nombre }}</h1>
+
+                <div class="precio-grande">${{ "%.2f"|format(producto.precio) }} MXN</div>
+
+                <p class="descripcion">{{ producto.descripcion }}</p>
+
+                <!-- Stock -->
+                <div class="info-stock">
+                    {% if producto.stock > 10 %}
+                    <i class="bi bi-check-circle-fill stock-disponible"></i>
+                    <span class="stock-disponible">En stock ({{ producto.stock }} disponibles)</span>
+                    {% elif producto.stock > 0 %}
+                    <i class="bi bi-exclamation-circle-fill stock-bajo"></i>
+                    <span class="stock-bajo">¡Últimas {{ producto.stock }} unidades!</span>
+                    {% else %}
+                    <i class="bi bi-x-circle-fill" style="color: var(--color-peligro);"></i>
+                    <span class="stock-agotado">Agotado</span>
+                    {% endif %}
+                </div>
+
+                {% if producto.stock > 0 %}
+                <!-- Selector de cantidad -->
+                <div class="selector-cantidad">
+                    <span style="color: var(--color-texto-claro); font-weight: 500;">Cantidad:</span>
+                    <button class="btn-cantidad" onclick="cambiarCantidad(-1)">−</button>
+                    <span class="cantidad-valor" id="cantidadProducto">1</span>
+                    <button class="btn-cantidad" onclick="cambiarCantidad(1)">+</button>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="d-flex gap-3 flex-wrap">
+                    <button class="btn-primario" onclick="agregarAlCarrito({{ producto.id }}, obtenerCantidad())"
+                        id="btnAgregarDetalle">
+                        <i class="bi bi-cart-plus"></i> Agregar al Carrito
+                    </button>
+                    <a href="{{ url_for('carrito.ver_carrito') }}" class="btn-secundario">
+                        <i class="bi bi-cart3"></i> Ver Carrito
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos relacionados -->
+    {% if relacionados %}
+    <section class="mt-5 pt-4" style="border-top: 1px solid rgba(255,255,255,0.1);">
+        <h3 class="titulo-seccion">Productos <span class="texto-gradiente">Relacionados</span></h3>
+        <p class="subtitulo-seccion">También te podría interesar</p>
+        <div class="row g-4">
+            {% for prod in relacionados %}
+            <div class="col-6 col-md-3">
+                <div class="tarjeta-producto">
+                    <div class="imagen-producto">
+                        {% if prod.imagen and prod.imagen != 'sin_imagen.png' %}
+                        <img src="{{ url_for('static', filename='uploads/' + prod.imagen) }}" alt="{{ prod.nombre }}"
+                            onerror="this.parentElement.innerHTML='<div class=\'imagen-placeholder\'><i class=\'bi bi-image\'></i></div>'">
+                        {% else %}
+                        <div class="imagen-placeholder"><i class="bi bi-image"></i></div>
+                        {% endif %}
+                    </div>
+                    <div class="cuerpo-tarjeta">
+                        <h5 class="nombre-producto">{{ prod.nombre }}</h5>
+                        <div class="precio-producto">${{ "%.2f"|format(prod.precio) }}</div>
+                        <div class="acciones-tarjeta">
+                            {% if prod.stock > 0 %}
+                            <button class="btn-agregar-carrito" onclick="agregarAlCarrito({{ prod.id }})">
+                                <i class="bi bi-cart-plus"></i> Agregar
+                            </button>
+                            {% else %}
+                            <span class="stock-agotado">Agotado</span>
+                            {% endif %}
+                            <a href="{{ url_for('productos.detalle_producto', producto_id=prod.id) }}"
+                                class="btn-ver-detalle">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+    const maxStock = {{ producto.stock }};
+
+    function cambiarCantidad(delta) {
+        const elem = document.getElementById('cantidadProducto');
+        let cantidad = parseInt(elem.textContent) + delta;
+        if (cantidad < 1) cantidad = 1;
+        if (cantidad > maxStock) cantidad = maxStock;
+        elem.textContent = cantidad;
+    }
+
+    function obtenerCantidad() {
+        return parseInt(document.getElementById('cantidadProducto').textContent);
+    }
+</script>
+{% endblock %}

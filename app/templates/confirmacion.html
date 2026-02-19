@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block titulo %}Compra Confirmada - TiendaOnline{% endblock %}
+
+{% block contenido %}
+<div class="container py-5">
+    <div class="confirmacion-exito">
+        <div class="icono-exito"><i class="bi bi-check-circle-fill"></i></div>
+        <h2>¡Compra Realizada con Éxito!</h2>
+        <p style="color: var(--color-texto-claro); font-size: 1.1rem;">Tu pago ha sido procesado correctamente</p>
+        <div class="numero-orden-confirmacion">Orden: {{ pedido.numero_orden }}</div>
+    </div>
+
+    <!-- Detalles del pedido -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-8">
+            <div
+                style="background: var(--color-fondo-card); border: 1px solid rgba(108,92,231,0.1); border-radius: var(--borde-radius); padding: 2rem;">
+                <h4 style="color: #fff; margin-bottom: 1.5rem;"><i class="bi bi-receipt"></i> Detalles del Pedido</h4>
+
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <small style="color: var(--color-texto-claro);">Fecha</small>
+                        <div style="color: #fff;">{{ pedido.fecha.strftime('%d/%m/%Y %H:%M') if pedido.fecha else 'N/A'
+                            }}</div>
+                    </div>
+                    <div class="col-6">
+                        <small style="color: var(--color-texto-claro);">Estado</small>
+                        <div><span class="badge-estado badge-pagado">Pagado</span></div>
+                    </div>
+                </div>
+
+                <table class="tabla-carrito" style="margin-top: 1rem;">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for detalle in detalles %}
+                        <tr>
+                            <td style="color: #fff;">{{ detalle.nombre }}</td>
+                            <td style="color: var(--color-texto-claro);">{{ detalle.cantidad }}</td>
+                            <td style="color: var(--color-texto-claro);">${{ "%.2f"|format(detalle.precio_unitario) }}
+                            </td>
+                            <td style="color: var(--color-secundario); font-weight: 600;">${{
+                                "%.2f"|format(detalle.subtotal) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="resumen-total mt-3">
+                    <span>Total Pagado</span>
+                    <span>${{ "%.2f"|format(pedido.total) }} MXN</span>
+                </div>
+            </div>
+
+            <div class="text-center mt-4 d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{{ url_for('pedidos.mis_pedidos') }}" class="btn-primario">
+                    <i class="bi bi-receipt"></i> Ver Mis Pedidos
+                </a>
+                <a href="{{ url_for('productos.catalogo') }}" class="btn-secundario">
+                    <i class="bi bi-grid"></i> Seguir Comprando
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block titulo %}Pedido {{ pedido.numero_orden }} - TiendaOnline{% endblock %}
+
+{% block contenido %}
+<div class="container py-4">
+    <a href="{{ url_for('pedidos.mis_pedidos') }}"
+        style="color: var(--color-texto-claro); display: inline-flex; align-items: center; gap: 0.3rem; margin-bottom: 1.5rem;">
+        <i class="bi bi-arrow-left"></i> Volver a Mis Pedidos
+    </a>
+
+    <h2 class="titulo-seccion">Pedido <span class="texto-gradiente">{{ pedido.numero_orden }}</span></h2>
+
+    <div class="row g-4 mt-2">
+        <div class="col-lg-8">
+            <div
+                style="background: var(--color-fondo-card); border: 1px solid rgba(108,92,231,0.1); border-radius: var(--borde-radius); padding: 2rem;">
+                <h4 style="color: #fff; margin-bottom: 1.5rem;"><i class="bi bi-box-seam"></i> Productos</h4>
+                <table class="tabla-carrito">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in detalles %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if d.imagen and d.imagen != 'sin_imagen.png' %}
+                                    <img src="{{ url_for('static', filename='uploads/' + d.imagen) }}"
+                                        alt="{{ d.nombre }}" class="item-carrito-img"
+                                        onerror="this.style.display='none'">
+                                    {% endif %}
+                                    <strong style="color: #fff;">{{ d.nombre }}</strong>
+                                </div>
+                            </td>
+                            <td style="color: var(--color-texto-claro);">{{ d.cantidad }}</td>
+                            <td style="color: var(--color-texto-claro);">${{ "%.2f"|format(d.precio_unitario) }}</td>
+                            <td style="color: var(--color-secundario); font-weight: 600;">${{ "%.2f"|format(d.subtotal)
+                                }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="resumen-total mt-3">
+                    <span>Total</span>
+                    <span>${{ "%.2f"|format(pedido.total) }} MXN</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="resumen-carrito">
+                <h4><i class="bi bi-info-circle"></i> Información</h4>
+                <div class="mb-3">
+                    <small style="color: var(--color-texto-claro);">Estado</small>
+                    <div><span class="badge-estado badge-{{ pedido.estado }}">{{ pedido.estado|capitalize }}</span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <small style="color: var(--color-texto-claro);">Fecha</small>
+                    <div style="color: #fff;">{{ pedido.fecha.strftime('%d/%m/%Y %H:%M') if pedido.fecha else 'N/A' }}
+                    </div>
+                </div>
+                {% if pedido.direccion_envio %}
+                <div class="mb-3">
+                    <small style="color: var(--color-texto-claro);">Dirección de envío</small>
+                    <div style="color: #fff;">{{ pedido.direccion_envio }}</div>
+                </div>
+                {% endif %}
+                {% if pedido.telefono %}
+                <div class="mb-3">
+                    <small style="color: var(--color-texto-claro);">Teléfono</small>
+                    <div style="color: #fff;">{{ pedido.telefono }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

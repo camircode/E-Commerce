@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block titulo %}Catálogo - TiendaOnline{% endblock %}
+
+{% block contenido %}
+<div class="container py-4">
+    <h2 class="titulo-seccion">Catálogo de <span class="texto-gradiente">Productos</span></h2>
+    <p class="subtitulo-seccion">{{ total_productos }} productos encontrados</p>
+
+    <div class="row">
+        <!-- Panel de filtros -->
+        <div class="col-lg-3 mb-4">
+            <div class="panel-filtros">
+                <h5><i class="bi bi-funnel"></i> Filtros</h5>
+                <form action="{{ url_for('productos.catalogo') }}" method="GET" id="formFiltros">
+                    <!-- Búsqueda -->
+                    <div class="mb-3">
+                        <label class="form-label">Buscar</label>
+                        <input type="text" class="form-control" name="busqueda" value="{{ busqueda }}"
+                            placeholder="Nombre del producto...">
+                    </div>
+
+                    <!-- Categoría -->
+                    <div class="mb-3">
+                        <label class="form-label">Categoría</label>
+                        <select class="form-select" name="categoria" onchange="this.form.submit()">
+                            <option value="">Todas las categorías</option>
+                            {% for cat in categorias %}
+                            <option value="{{ cat.id }}" {{ 'selected' if categoria_id|string==cat.id|string }}>{{
+                                cat.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Rango de precios -->
+                    <div class="mb-3">
+                        <label class="form-label">Precio mínimo: $<span id="valorPrecioMin">{{ "%.0f"|format(precio_min)
+                                }}</span></label>
+                        <input type="range" class="form-range" name="precio_min" id="rangoPrecioMin"
+                            min="{{ rango_precios.min_precio if rango_precios else 0 }}"
+                            max="{{ rango_precios.max_precio if rango_precios else 50000 }}" step="100"
+                            value="{{ precio_min }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Precio máximo: $<span id="valorPrecioMax">{{ "%.0f"|format(precio_max)
+                                if precio_max < 99999 else (rango_precios.max_precio if rango_precios else 99999)
+                                    }}</span></label>
+                        <input type="range" class="form-range" name="precio_max" id="rangoPrecioMax"
+                            min="{{ rango_precios.min_precio if rango_precios else 0 }}"
+                            max="{{ rango_precios.max_precio if rango_precios else 50000 }}" step="100"
+                            value="{{ precio_max if precio_max < 99999 else (rango_precios.max_precio if rango_precios else 50000) }}">
+                    </div>
+
+                    <button type="submit" class="btn-primario w-100 justify-content-center"
+                        style="font-size: 0.9rem; padding: 0.6rem;">
+                        <i class="bi bi-search"></i> Aplicar Filtros
+                    </button>
+                    <a href="{{ url_for('productos.catalogo') }}" class="btn-secundario w-100 text-center mt-2 d-block"
+                        style="font-size: 0.85rem; padding: 0.5rem;">
+                        Limpiar Filtros
+                    </a>
+                </form>
+            </div>
+        </div>
+
+        <!-- Grid de productos -->
+        <div class="col-lg-9">
+            {% if productos %}
+            <div class="row g-4">
+                {% for producto in productos %}
+                <div class="col-6 col-md-4">
+                    <div class="tarjeta-producto">
+                        <div class="imagen-producto">
+                            {% if producto.imagen and producto.imagen != 'sin_imagen.png' %}
+                            <img src="{{ url_for('static', filename='uploads/' + producto.imagen) }}"
+                                alt="{{ producto.nombre }}"
+                                onerror="this.parentElement.innerHTML='<div class=\'imagen-placeholder\'><i class=\'bi bi-image\'></i></div>'">
+                            {% else %}
+                            <div class="imagen-placeholder"><i class="bi bi-image"></i></div>
+                            {% endif %}
+                        </div>
+                        <div class="cuerpo-tarjeta">
+                            {% if producto.categoria_nombre %}
+                            <span class="categoria-badge">{{ producto.categoria_nombre }}</span>
+                            {% endif %}
+                            <h5 class="nombre-producto">{{ producto.nombre }}</h5>
+                            <div class="precio-producto">${{ "%.2f"|format(producto.precio) }}</div>
+                            <div class="acciones-tarjeta">
+                                {% if producto.stock > 0 %}
+                                <button class="btn-agregar-carrito" onclick="agregarAlCarrito({{ producto.id }})">
+                                    <i class="bi bi-cart-plus"></i> Agregar
+                                </button>
+                                {% else %}
+                                <span class="stock-agotado"><i class="bi bi-x-circle"></i> Agotado</span>
+                                {% endif %}
+                                <a href="{{ url_for('productos.detalle_producto', producto_id=producto.id) }}"
+                                    class="btn-ver-detalle">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Paginación -->
+            {% if total_paginas > 1 %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center paginacion-custom">
+                    <li class="page-item {{ 'disabled' if pagina <= 1 }}">
+                        <a class="page-link"
+                            href="{{ url_for('productos.catalogo', pagina=pagina-1, busqueda=busqueda, categoria=categoria_id, precio_min=precio_min, precio_max=precio_max) }}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% for p in range(1, total_paginas + 1) %}
+                    <li class="page-item {{ 'active' if p == pagina }}">
+                        <a class="page-link"
+                            href="{{ url_for('productos.catalogo', pagina=p, busqueda=busqueda, categoria=categoria_id, precio_min=precio_min, precio_max=precio_max) }}">{{
+                            p }}</a>
+                    </li>
+                    {% endfor %}
+                    <li class="page-item {{ 'disabled' if pagina >= total_paginas }}">
+                        <a class="page-link"
+                            href="{{ url_for('productos.catalogo', pagina=pagina+1, busqueda=busqueda, categoria=categoria_id, precio_min=precio_min, precio_max=precio_max) }}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-search" style="font-size: 4rem; color: var(--color-texto-claro);"></i>
+                <h3 class="mt-3 text-white">No se encontraron productos</h3>
+                <p class="text-muted">Intenta con otros filtros o términos de búsqueda</p>
+                <a href="{{ url_for('productos.catalogo') }}" class="btn-primario mt-2">Ver todos los productos</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+    // Actualizar valores de rango de precios en tiempo real
+    const rangoPrecioMin = document.getElementById('rangoPrecioMin');
+    const rangoPrecioMax = document.getElementById('rangoPrecioMax');
+    const valorPrecioMin = document.getElementById('valorPrecioMin');
+    const valorPrecioMax = document.getElementById('valorPrecioMax');
+
+    if (rangoPrecioMin) {
+        rangoPrecioMin.addEventListener('input', function () {
+            valorPrecioMin.textContent = parseFloat(this.value).toLocaleString('es-MX');
+        });
+    }
+    if (rangoPrecioMax) {
+        rangoPrecioMax.addEventListener('input', function () {
+            valorPrecioMax.textContent = parseFloat(this.value).toLocaleString('es-MX');
+        });
+    }
+</script>
+{% endblock %}
