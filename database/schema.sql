@@ -5,6 +5,10 @@
 CREATE DATABASE IF NOT EXISTS ecommerce_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE ecommerce_db;
 
+-- Forzar charset UTF-8 en la sesión del cliente MySQL
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+
 -- --------------------------------------------
 -- Tabla: usuarios
 -- --------------------------------------------
