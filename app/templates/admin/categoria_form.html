@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block titulo %}{{ accion }} Categoría - TiendaOnline{% endblock %}
+
+{% block contenido %}
+<div class="container py-4">
+    <a href="{{ url_for('admin.listar_categorias') }}"
+        style="color: var(--color-texto-claro); display: inline-flex; align-items: center; gap: 0.3rem; margin-bottom: 1.5rem;">
+        <i class="bi bi-arrow-left"></i> Volver a Categorías
+    </a>
+
+    <h2 class="titulo-seccion"><i class="bi bi-{{ 'plus-lg' if accion == 'Crear' else 'pencil' }}"></i> {{ accion }}
+        <span class="texto-gradiente">Categoría</span></h2>
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-lg-6">
+            <div
+                style="background: var(--color-fondo-card); border: 1px solid rgba(108,92,231,0.1); border-radius: var(--borde-radius); padding: 2rem;">
+                <form
+                    action="{{ url_for('admin.editar_categoria', categoria_id=categoria.id) if categoria else url_for('admin.crear_categoria') }}"
+                    method="POST" id="formCategoria">
+
+                    <div class="form-flotante">
+                        <label for="nombre">Nombre de la categoría *</label>
+                        <input type="text" id="nombre" name="nombre" required
+                            value="{{ categoria.nombre if categoria else (nombre|default('')) }}"
+                            placeholder="Nombre de la categoría">
+                    </div>
+
+                    <div class="form-flotante">
+                        <label for="descripcion">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" rows="4"
+                            placeholder="Descripción de la categoría">{{ categoria.descripcion if categoria else (descripcion|default('')) }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn-exito w-100 mt-3"
+                        style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <i class="bi bi-{{ 'save' if accion == 'Editar' else 'plus-lg' }}"></i>
+                        {{ 'Guardar Cambios' if accion == 'Editar' else 'Crear Categoría' }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

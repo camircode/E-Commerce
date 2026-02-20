@@ -74,14 +74,14 @@ CREATE TABLE IF NOT EXISTS detalle_pedido (
 -- --------------------------------------------
 -- Índices
 -- --------------------------------------------
-CREATE INDEX idx_productos_categoria ON productos(categoria_id);
-CREATE INDEX idx_productos_precio ON productos(precio);
-CREATE INDEX idx_pedidos_usuario ON pedidos(usuario_id);
-CREATE INDEX idx_pedidos_fecha ON pedidos(fecha);
-CREATE INDEX idx_detalle_pedido ON detalle_pedido(pedido_id);
+CREATE INDEX idx_productos_categoria ON productos(categoria_id) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE INDEX idx_productos_precio ON productos(precio) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE INDEX idx_pedidos_usuario ON pedidos(usuario_id) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE INDEX idx_pedidos_fecha ON pedidos(fecha) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE INDEX idx_detalle_pedido ON detalle_pedido(pedido_id) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- El usuario administrador se crea automáticamente al iniciar la aplicación Flask
--- con contraseña encriptada con bcrypt. Credenciales: admin@tienda.com / admin123
+-- con contraseña encriptada con bcrypt.
 
 
 -- --------------------------------------------
@@ -92,7 +92,7 @@ INSERT INTO categorias (nombre, descripcion) VALUES
 ('Ropa', 'Moda y vestimenta para todas las edades'),
 ('Hogar', 'Artículos para el hogar y decoración'),
 ('Deportes', 'Equipamiento y ropa deportiva'),
-('Libros', 'Libros, revistas y material de lectura');
+('Libros', 'Libros, revistas y material de lectura') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------
 -- Datos iniciales: Productos de ejemplo
@@ -112,4 +112,4 @@ INSERT INTO productos (nombre, descripcion, precio, stock, imagen, categoria_id)
 ('El Arte de Programar', 'Libro esencial sobre algoritmos y estructuras de datos', 349.99, 70, 'libro_programar.png', 5),
 ('Novela Bestseller 2025', 'La novela más vendida del año, edición especial de pasta dura', 299.99, 80, 'novela.png', 5),
 ('Teclado Mecánico RGB', 'Teclado mecánico con switches Cherry MX e iluminación RGB personalizable', 1899.99, 30, 'teclado.png', 1),
-('Mochila Ejecutiva', 'Mochila con compartimento acolchado para laptop de hasta 17"', 799.99, 40, 'mochila.png', 3);
+('Mochila Ejecutiva', 'Mochila con compartimento acolchado para laptop de hasta 17"', 799.99, 40, 'mochila.png', 3) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

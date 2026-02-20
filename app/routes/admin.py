@@ -235,3 +235,119 @@ def actualizar_pedido(pedido_id):
 
     flash(f'Estado del pedido actualizado a "{nuevo_estado}".', 'exito')
     return redirect(url_for('admin.listar_pedidos'))
+
+
+# ============================================
+# CRUD de Categorías
+# ============================================
+
+@admin_bp.route('/categorias')
+@admin_requerido
+def listar_categorias():
+    """Lista todas las categorías para administración"""
+    categorias = ejecutar_consulta(
+        """SELECT c.*, COUNT(p.id) as total_productos 
+           FROM categorias c 
+           LEFT JOIN productos p ON c.id = p.categoria_id AND p.activo = 1 
+           GROUP BY c.id 
+           ORDER BY c.nombre""",
+        obtener_todos=True
+    ) or []
+
+    return render_template('admin/categorias.html', categorias=categorias)
+
+
+@admin_bp.route('/categorias/crear', methods=['GET', 'POST'])
+@admin_requerido
+def crear_categoria():
+    """Crear una nueva categoría"""
+    if request.method == 'POST':
+        nombre = request.form.get('nombre', '').strip()
+        descripcion = request.form.get('descripcion', '').strip()
+
+        if not nombre:
+            flash('El nombre de la categoría es obligatorio.', 'error')
+            return render_template('admin/categoria_form.html', accion='Crear')
+
+        # Verificar si ya existe una categoría con ese nombre
+        existente = ejecutar_consulta(
+            "SELECT id FROM categorias WHERE nombre = %s", (nombre,), obtener_uno=True
+        )
+        if existente:
+            flash('Ya existe una categoría con ese nombre.', 'error')
+            return render_template('admin/categoria_form.html', accion='Crear', nombre=nombre, descripcion=descripcion)
+
+        categoria_id = ejecutar_consulta(
+            "INSERT INTO categorias (nombre, descripcion) VALUES (%s, %s)",
+            (nombre, descripcion),
+            obtener_id=True
+        )
+
+        if categoria_id:
+            flash('Categoría creada exitosamente.', 'exito')
+            return redirect(url_for('admin.listar_categorias'))
+        else:
+            flash('Error al crear la categoría.', 'error')
+
+    return render_template('admin/categoria_form.html', accion='Crear')
+
+
+@admin_bp.route('/categorias/editar/<int:categoria_id>', methods=['GET', 'POST'])
+@admin_requerido
+def editar_categoria(categoria_id):
+    """Editar una categoría existente"""
+    categoria = ejecutar_consulta(
+        "SELECT * FROM categorias WHERE id = %s", (categoria_id,), obtener_uno=True
+    )
+
+    if not categoria:
+        flash('Categoría no encontrada.', 'error')
+        return redirect(url_for('admin.listar_categorias'))
+
+    if request.method == 'POST':
+        nombre = request.form.get('nombre', '').strip()
+        descripcion = request.form.get('descripcion', '').strip()
+
+        if not nombre:
+            flash('El nombre de la categoría es obligatorio.', 'error')
+            return render_template('admin/categoria_form.html', categoria=categoria, accion='Editar')
+
+        # Verificar duplicado (excluyendo la categoría actual)
+        existente = ejecutar_consulta(
+            "SELECT id FROM categorias WHERE nombre = %s AND id != %s",
+            (nombre, categoria_id), obtener_uno=True
+        )
+        if existente:
+            flash('Ya existe otra categoría con ese nombre.', 'error')
+            return render_template('admin/categoria_form.html', categoria=categoria, accion='Editar')
+
+        filas = ejecutar_consulta(
+            "UPDATE categorias SET nombre = %s, descripcion = %s WHERE id = %s",
+            (nombre, descripcion, categoria_id)
+        )
+
+        if filas is not None:
+            flash('Categoría actualizada exitosamente.', 'exito')
+            return redirect(url_for('admin.listar_categorias'))
+        else:
+            flash('Error al actualizar la categoría.', 'error')
+
+    return render_template('admin/categoria_form.html', categoria=categoria, accion='Editar')
+
+
+@admin_bp.route('/categorias/eliminar/<int:categoria_id>', methods=['POST'])
+@admin_requerido
+def eliminar_categoria(categoria_id):
+    """Eliminar una categoría (solo si no tiene productos asociados)"""
+    productos_asociados = ejecutar_consulta(
+        "SELECT COUNT(*) as total FROM productos WHERE categoria_id = %s AND activo = 1",
+        (categoria_id,), obtener_uno=True
+    )
+
+    if productos_asociados and productos_asociados['total'] > 0:
+        flash(f'No se puede eliminar: la categoría tiene {productos_asociados["total"]} producto(s) activo(s) asociado(s).', 'error')
+        return redirect(url_for('admin.listar_categorias'))
+
+    ejecutar_consulta("DELETE FROM categorias WHERE id = %s", (categoria_id,))
+    flash('Categoría eliminada exitosamente.', 'exito')
+    return redirect(url_for('admin.listar_categorias'))

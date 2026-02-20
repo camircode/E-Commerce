@@ -40,7 +40,7 @@ def inicializar_admin():
             "INSERT INTO usuarios (nombre, email, password, rol) VALUES (%s, %s, %s, 'admin')",
             ('Administrador', 'admin@tienda.com', password_hash.decode('utf-8'))
         )
-        print("✓ Usuario administrador creado: admin@tienda.com / admin123")
+        print("✓ Usuario administrador creado exitosamente.")
     else:
         print("✓ Usuario administrador ya existe")
 
