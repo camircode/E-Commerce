@@ -992,12 +992,17 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .footer-principal ul li a {
-    color: var(--color-texto-claro);
+    color: rgba(255, 255, 255, 0.7);
     font-size: 0.9rem;
 }
 
 .footer-principal ul li a:hover {
     color: var(--color-primario);
+}
+
+.footer-principal .text-muted,
+.footer-principal p {
+    color: rgba(255, 255, 255, 0.6) !important;
 }
 
 .redes-sociales a {
