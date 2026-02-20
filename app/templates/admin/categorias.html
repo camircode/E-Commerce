@@ -19,6 +19,7 @@
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Ícono</th>
                     <th>Nombre</th>
                     <th>Descripción</th>
                     <th>Productos Activos</th>
@@ -29,6 +30,11 @@
                 {% for categoria in categorias %}
                 <tr>
                     <td style="color: var(--color-texto-claro);">#{{ categoria.id }}</td>
+                    <td>
+                        <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(108,92,231,0.15); display: flex; align-items: center; justify-content: center;">
+                            <i class="bi {{ categoria.icono|default('bi-tag') }}" style="font-size: 1.2rem; color: var(--color-primario);"></i>
+                        </div>
+                    </td>
                     <td><strong style="color: #fff;">{{ categoria.nombre }}</strong></td>
                     <td style="color: var(--color-texto-claro);">{{ categoria.descripcion or 'Sin descripción' }}</td>
                     <td>

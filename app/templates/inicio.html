@@ -38,13 +38,12 @@
         <h2 class="titulo-seccion text-center">Nuestras <span class="texto-gradiente">Categorías</span></h2>
         <p class="subtitulo-seccion text-center">Encuentra lo que necesitas navegando por nuestras categorías</p>
         <div class="row g-4">
-            {% set iconos = ['bi-cpu', 'bi-bag', 'bi-house', 'bi-trophy', 'bi-book'] %}
             {% for cat in categorias %}
             <div class="col-6 col-md-4 col-lg">
                 <a href="{{ url_for('productos.catalogo', categoria=cat.id) }}" style="text-decoration: none;">
                     <div class="tarjeta-categoria">
                         <div class="icono-categoria">
-                            <i class="bi {{ iconos[loop.index0 % iconos|length] }}"></i>
+                            <i class="bi {{ cat.icono|default('bi-tag') }}"></i>
                         </div>
                         <h5>{{ cat.nombre }}</h5>
                         <span class="cantidad">{{ cat.total_productos }} productos</span>

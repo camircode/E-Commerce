@@ -26,6 +26,28 @@ def inicializar_admin():
         time.sleep(2)
         intentos += 1
 
+    # Migración: agregar columna icono a categorias si no existe
+    try:
+        ejecutar_consulta(
+            "ALTER TABLE categorias ADD COLUMN icono VARCHAR(50) DEFAULT 'bi-tag'",
+        )
+        # Asignar íconos por defecto a categorías existentes
+        iconos_default = {
+            'Electrónica': 'bi-cpu', 'Electronica': 'bi-cpu',
+            'Ropa': 'bi-handbag',
+            'Hogar': 'bi-house-heart',
+            'Deportes': 'bi-dribbble',
+            'Libros': 'bi-book'
+        }
+        for nombre, icono in iconos_default.items():
+            ejecutar_consulta(
+                "UPDATE categorias SET icono = %s WHERE nombre = %s AND (icono IS NULL OR icono = 'bi-tag')",
+                (icono, nombre)
+            )
+        print("✓ Columna 'icono' agregada a categorías")
+    except Exception:
+        pass  # La columna ya existe
+
     # Verificar si el admin ya existe
     admin = ejecutar_consulta(
         "SELECT id FROM usuarios WHERE email = %s",

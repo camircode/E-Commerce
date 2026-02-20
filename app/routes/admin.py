@@ -264,6 +264,7 @@ def crear_categoria():
     if request.method == 'POST':
         nombre = request.form.get('nombre', '').strip()
         descripcion = request.form.get('descripcion', '').strip()
+        icono = request.form.get('icono', 'bi-tag').strip()
 
         if not nombre:
             flash('El nombre de la categoría es obligatorio.', 'error')
@@ -278,8 +279,8 @@ def crear_categoria():
             return render_template('admin/categoria_form.html', accion='Crear', nombre=nombre, descripcion=descripcion)
 
         categoria_id = ejecutar_consulta(
-            "INSERT INTO categorias (nombre, descripcion) VALUES (%s, %s)",
-            (nombre, descripcion),
+            "INSERT INTO categorias (nombre, descripcion, icono) VALUES (%s, %s, %s)",
+            (nombre, descripcion, icono),
             obtener_id=True
         )
 
@@ -307,6 +308,7 @@ def editar_categoria(categoria_id):
     if request.method == 'POST':
         nombre = request.form.get('nombre', '').strip()
         descripcion = request.form.get('descripcion', '').strip()
+        icono = request.form.get('icono', 'bi-tag').strip()
 
         if not nombre:
             flash('El nombre de la categoría es obligatorio.', 'error')
@@ -322,8 +324,8 @@ def editar_categoria(categoria_id):
             return render_template('admin/categoria_form.html', categoria=categoria, accion='Editar')
 
         filas = ejecutar_consulta(
-            "UPDATE categorias SET nombre = %s, descripcion = %s WHERE id = %s",
-            (nombre, descripcion, categoria_id)
+            "UPDATE categorias SET nombre = %s, descripcion = %s, icono = %s WHERE id = %s",
+            (nombre, descripcion, icono, categoria_id)
         )
 
         if filas is not None:

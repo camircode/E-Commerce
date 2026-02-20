@@ -27,7 +27,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
 CREATE TABLE IF NOT EXISTS categorias (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
-    descripcion TEXT
+    descripcion TEXT,
+    icono VARCHAR(50) DEFAULT 'bi-tag'
 ) ENGINE=InnoDB;
 
 -- --------------------------------------------
@@ -91,12 +92,12 @@ CREATE INDEX idx_detalle_pedido ON detalle_pedido(pedido_id);
 -- --------------------------------------------
 -- Datos iniciales: Categorías
 -- --------------------------------------------
-INSERT INTO categorias (nombre, descripcion) VALUES
-('Electrónica', 'Dispositivos electrónicos, gadgets y accesorios tecnológicos'),
-('Ropa', 'Moda y vestimenta para todas las edades'),
-('Hogar', 'Artículos para el hogar y decoración'),
-('Deportes', 'Equipamiento y ropa deportiva'),
-('Libros', 'Libros, revistas y material de lectura');
+INSERT INTO categorias (nombre, descripcion, icono) VALUES
+('Electrónica', 'Dispositivos electrónicos, gadgets y accesorios tecnológicos', 'bi-cpu'),
+('Ropa', 'Moda y vestimenta para todas las edades', 'bi-handbag'),
+('Hogar', 'Artículos para el hogar y decoración', 'bi-house-heart'),
+('Deportes', 'Equipamiento y ropa deportiva', 'bi-dribbble'),
+('Libros', 'Libros, revistas y material de lectura', 'bi-book');
 
 -- --------------------------------------------
 -- Datos iniciales: Productos de ejemplo

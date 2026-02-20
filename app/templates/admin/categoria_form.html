@@ -32,6 +32,47 @@
                             placeholder="Descripción de la categoría">{{ categoria.descripcion if categoria else (descripcion|default('')) }}</textarea>
                     </div>
 
+                    <!-- Selector de ícono -->
+                    <div class="form-flotante">
+                        <label>Ícono de la categoría</label>
+                        <input type="hidden" id="icono" name="icono" 
+                            value="{{ categoria.icono if categoria else 'bi-tag' }}">
+                        
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div id="iconoPreview" 
+                                style="width: 60px; height: 60px; border-radius: 12px; background: rgba(108,92,231,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <i class="bi {{ categoria.icono if categoria else 'bi-tag' }}" 
+                                    style="font-size: 1.8rem; color: var(--color-primario);"></i>
+                            </div>
+                            <small style="color: var(--color-texto-claro);">Selecciona un ícono para la categoría</small>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 8px; max-height: 280px; overflow-y: auto; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px;">
+                            {% set iconos_disponibles = [
+                                'bi-cpu', 'bi-laptop', 'bi-phone', 'bi-tablet', 'bi-smartwatch', 'bi-headphones', 'bi-speaker', 'bi-camera', 'bi-printer', 'bi-keyboard', 'bi-mouse', 'bi-display', 'bi-router', 'bi-usb-drive', 'bi-controller',
+                                'bi-handbag', 'bi-bag', 'bi-bag-heart', 'bi-shop', 'bi-cart3', 'bi-gift', 'bi-gem', 'bi-watch',
+                                'bi-house-heart', 'bi-house-door', 'bi-lamp', 'bi-lightbulb', 'bi-fan', 'bi-plug', 'bi-cup-hot', 'bi-palette',
+                                'bi-dribbble', 'bi-bicycle', 'bi-trophy', 'bi-stopwatch', 'bi-heart-pulse', 'bi-activity',
+                                'bi-book', 'bi-journal-text', 'bi-bookmark-star', 'bi-pencil-square', 'bi-newspaper',
+                                'bi-music-note-beamed', 'bi-film', 'bi-disc', 'bi-vinyl', 'bi-camera-reels',
+                                'bi-flower1', 'bi-tree', 'bi-sun', 'bi-umbrella', 'bi-droplet',
+                                'bi-tools', 'bi-wrench', 'bi-hammer', 'bi-scissors', 'bi-brush',
+                                'bi-car-front', 'bi-truck', 'bi-airplane', 'bi-scooter', 'bi-fuel-pump',
+                                'bi-egg-fried', 'bi-cup-straw', 'bi-cake2',
+                                'bi-heart', 'bi-star', 'bi-puzzle', 'bi-box-seam', 'bi-tag', 'bi-tags', 'bi-grid', 'bi-basket', 'bi-fire', 'bi-snow', 'bi-globe', 'bi-shield-check', 'bi-rocket-takeoff', 'bi-lightning'
+                            ] %}
+                            {% for icono_op in iconos_disponibles %}
+                            <button type="button" 
+                                class="btn-icono-selector {{ 'activo' if (categoria and categoria.icono == icono_op) or (not categoria and icono_op == 'bi-tag') }}" 
+                                data-icono="{{ icono_op }}"
+                                title="{{ icono_op|replace('bi-', '') }}"
+                                style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid {{ 'var(--color-primario)' if (categoria and categoria.icono == icono_op) or (not categoria and icono_op == 'bi-tag') else 'transparent' }}; background: {{ 'rgba(108,92,231,0.25)' if (categoria and categoria.icono == icono_op) or (not categoria and icono_op == 'bi-tag') else 'rgba(108,92,231,0.08)' }}; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                                <i class="bi {{ icono_op }}" style="font-size: 1.3rem; color: rgba(255,255,255,0.7);"></i>
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn-exito w-100 mt-3"
                         style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                         <i class="bi bi-{{ 'save' if accion == 'Editar' else 'plus-lg' }}"></i>
@@ -42,4 +83,29 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputIcono = document.getElementById('icono');
+        const preview = document.getElementById('iconoPreview');
+        const botones = document.querySelectorAll('.btn-icono-selector');
+
+        botones.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const icono = this.getAttribute('data-icono');
+                inputIcono.value = icono;
+                preview.innerHTML = '<i class="bi ' + icono + '" style="font-size: 1.8rem; color: var(--color-primario);"></i>';
+                
+                botones.forEach(function(b) {
+                    b.style.borderColor = 'transparent';
+                    b.style.background = 'rgba(108,92,231,0.08)';
+                });
+                this.style.borderColor = 'var(--color-primario)';
+                this.style.background = 'rgba(108,92,231,0.25)';
+            });
+        });
+    });
+</script>
 {% endblock %}
